@@ -1,25 +1,34 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { List, ListItem, Container, Navbar, NavbarInner, ContentContainer, SideBar, InnerContentContainer } from './styles'
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Navbar>
+        <NavbarInner>
+          <h2>Matchmaking MMR</h2>
+        </NavbarInner>
+      </Navbar>
+      <ContentContainer>
+        <SideBar>
+          <List>
+            <ListItem>
+              <p>Testing</p>
+            </ListItem>
+            <ListItem>
+              <p>Testing</p>
+            </ListItem>
+          </List>
+        </SideBar>
+        <InnerContentContainer>
+
+          <p>blah blah blah datatable here</p>
+        </InnerContentContainer>
+
+      </ContentContainer>
+    </Container>
   );
 }
 
