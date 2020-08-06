@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import axios from 'axios'
 import { List, ListItem, Container, Navbar, NavbarInner, ContentContainer, SideBar, InnerContentContainer } from './styles'
 
 const App = () => {
+  const [time, setTime] = useState(null)
+  useEffect(() => {
+    fetch('http://127.0.0.1:5000/time').then(res => res.json()).then(data => {
+      setTime(data.time)
+    })
+  }, [])
+  
   return (
     <Container>
       <Navbar>
@@ -24,7 +32,7 @@ const App = () => {
         </SideBar>
         <InnerContentContainer>
 
-          <p>blah blah blah datatable here</p>
+          <p>Time: {time}</p>
         </InnerContentContainer>
 
       </ContentContainer>
