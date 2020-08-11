@@ -3,12 +3,13 @@ import logo from './logo.svg';
 import './App.css';
 import axios from 'axios'
 import { List, ListItem, Container, Navbar, NavbarInner, ContentContainer, SideBar, InnerContentContainer } from './styles'
-
+import DataTable from 'react-data-table-component'
 const App = () => {
-  const [time, setTime] = useState(null)
+  const [data, setData] = useState(null)
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/time').then(res => res.json()).then(data => {
-      setTime(data.time)
+    axios.get('http://127.0.0.1:5000/time').then(res => {
+      console.log(res.data)
+      setData(res.data)
     })
   }, [])
   
@@ -31,8 +32,17 @@ const App = () => {
           </List>
         </SideBar>
         <InnerContentContainer>
+          <h2>AARON</h2>
+          {data && 
+            data.aaron.map(row => {
+              return <p>{row.mmr}</p>
+            })}
+          {/* {data && <DataTable
+            columns={['mmr']}
+            title="MMR"
+            data={data.aaron}/>} */}
 
-          <p>Time: {time}</p>
+          
         </InnerContentContainer>
 
       </ContentContainer>
