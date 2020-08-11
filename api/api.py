@@ -11,9 +11,9 @@ mongo = PyMongo(app)
 
 people = ["aaron", "cam", "erik", "ian", "liam", "nicky", "vevey", "will", "yuuki", "steve"]
 
-@app.route('/time')
+@app.route('/get_mmr')
 @cross_origin()
-def get_current_time():
+def get_mmr():
     aaron = mongo.db["aaron"].find()
     response = {}
     for person in people: 
@@ -27,5 +27,4 @@ def get_current_time():
         response[person] = res_list
     
     print(response)
-    # response.headers.add('Access-Control-Allow-Origin', '*')
     return response

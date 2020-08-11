@@ -7,7 +7,7 @@ import DataTable from 'react-data-table-component'
 const App = () => {
   const [data, setData] = useState(null)
   useEffect(() => {
-    axios.get('http://127.0.0.1:5000/time').then(res => {
+    axios.get('http://127.0.0.1:5000/get_mmr').then(res => {
       console.log(res.data)
       setData(res.data)
     })
