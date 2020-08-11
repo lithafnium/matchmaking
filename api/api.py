@@ -3,6 +3,7 @@ from flask import Flask
 from flask_cors import CORS, cross_origin
 from flask_pymongo import PyMongo
 
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -14,17 +15,27 @@ people = ["aaron", "cam", "erik", "ian", "liam", "nicky", "vevey", "will", "yuuk
 @app.route('/get_mmr')
 @cross_origin()
 def get_mmr():
-    aaron = mongo.db["aaron"].find()
     response = {}
+    people_list = []
     for person in people: 
-        mmr = mongo.db[person].find()
-        res_list = []
-        for doc in mmr:
-            info = {}
-            info['mmr'] = doc['mmr']
-            info['id'] = str(doc['_id'])
-            res_list.append(info)
-        response[person] = res_list
-    
+        mmr = mongo.db[person].find_one(sort=[( '_id', -1 )])
+        info = {
+            'mmr': mmr['mmr'],
+            'id': str(mmr['_id'])
+        }
+        people_list.append({
+            'person': person,
+            'mmr': info
+        })
+        
+        print(person, mmr)
+        # res_list = []
+        # for doc in mmr:
+        #     info = {}
+        #     info['mmr'] = doc['mmr']
+        #     info['id'] = str(doc['_id'])
+        #     res_list.append(info)
+        # response[person] = res_list
+    response['data'] = people_list
     print(response)
     return response
