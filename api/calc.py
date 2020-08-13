@@ -6,22 +6,25 @@ client = pymongo.MongoClient(
     "mongodb+srv://bobjoe:abc@cluster0.j9y1e.mongodb.net/test?retryWrites=true&w=majority"
 )
 
-team1 = {"vevey": "top", "yuuki": "jng", "erik": "mid", "liam": "adc", "cam": "sup"}
-team2 = {"will": "top", "nicky": "jng", "aaron": "mid", "steve": "adc", "ian": "sup"}
+blue3 = {"top": "vevey", "jng": "aaron", "mid": "steve", "adc": "liam", "sup": "ian"}
+red3 = {"top": "shane", "jng": "will", "mid": "yuuki", "adc": "nicky", "sup": "cam"}
 
-team1G1 = {"aaron": "top", "vevey": "jng", "cam": "mid", "liam": "adc", "steve": "sup"}
-team2G1 = {"will": "top", "erik": "jng", "ian": "mid", "nicky": "adc", "yuuki": "sup"}
+blue2 = {"top": "vevey", "jng": "yuuki", "mid": "erik", "adc": "liam", "sup": "cam"}
+red2 = {"top": "will", "jng": "nicky", "mid": "aaron", "adc": "steve", "sup": "ian"}
 
+blue1 = {"top": "aaron", "jng": "vevey", "mid": "cam", "adc": "liam", "sup": "steve"}
+red1 = {"top": "will", "jng": "erik", "mid": "ian", "adc": "nicky", "sup": "yuuki"}
 
+# finds average team mmr
 def team_mmr(team):
     average = 0
-    for key in team.keys():
+    for value in team.values():
         # change this to mmr
         db = client.mmr
         # change to key
-        col = key
+        col = value
         last_document = op.find_last_document(db, col)
-        mmr = int(float(last_document[0]["mmr"]))
+        mmr = float(last_document[0]["mmr"])
         average += mmr
     return average / len(team)
 
@@ -32,25 +35,32 @@ def expected_outcome(a, b):
     return 1 / denom
 
 
+# finds mmr of a certain player
+def find_mmr(player):
+    db = client.mmr
+    # change to key
+    last_document = op.find_last_document(db, player)
+    mmr = int(float(last_document[0]["mmr"]))
+    return mmr
+
+
 # stats tracker
 
 
-def update_player_mmr(player, result, own_team, opp_team):
+def update_player_mmr(player, result, own_team_mmr, opp_team_mmr, mu_mmr):
     # change to mmr
     db = client.mmr
     # change to player
     col = db[player]
-    curr_rating = int(float(op.find_last_document(db, player)[0]["mmr"]))
-    # k-factor of 24, taken from elo wiki
+    curr_rating = find_mmr(player)
+
     k_pers = 16
     k_team = 16
     k_mu = 16
 
-    expected_personal = expected_outcome(curr_rating, team_mmr(opp_team))
-    expected_team = expected_outcome(team_mmr(own_team), team_mmr(opp_team))
-
-    opp_rating = int(float(op.find_last_document(db, player)[0]["mmr"]))
-    expected_mu = expected_outcome(curr_rating, opp_rating)
+    expected_personal = expected_outcome(curr_rating, opp_team_mmr)
+    expected_team = expected_outcome(own_team_mmr, opp_team_mmr)
+    expected_mu = expected_outcome(curr_rating, mu_mmr)
 
     updated_rating = (
         curr_rating
@@ -66,14 +76,7 @@ def update_player_mmr(player, result, own_team, opp_team):
 team1_result = 1
 team2_result = 0
 
-
-def update_all(team_one, team_two, one_result, two_result):
-    for key in team_one.keys():
-        update_player_mmr(key, one_result, team_one, team_two)
-    for key in team_two.keys():
-        update_player_mmr(key, two_result, team_two, team_one)
-
-
+# returns an array of mmr rankings
 def ladder_ranking():
     # change to mmr
     db = client.mmr
@@ -82,11 +85,50 @@ def ladder_ranking():
         # print(int(float(op.find_last_document(db, i)[0]["mmr"])))
         rankings[i] = int(float(op.find_last_document(db, i)[0]["mmr"]))
 
+    rankings_dict = rankings
     sorted_rankings = sorted(rankings.items(), key=lambda x: x[1], reverse=True)
-
     print(sorted_rankings)
+    return sorted_rankings, rankings_dict
 
 
-#update_all(team1, team2, 1, 0)
+def mmr_history(player):
+    db = client.mmr
+    col = db[player]
+    history = []
+    for i in col.find():
+        history.append(int(float(i["mmr"])))
+    print(history)
+    return history
 
+
+def delete_most_recent_game(player):
+    db = client.mmr
+    db[player].delete_one(op.find_last_document(client.test, player)[0])
+
+
+def undo_last_game():
+    db = client.mmr
+
+
+
+
+def update_all(team_one, team_two, one_result, two_result):
+    team_one_mmr = team_mmr(team_one)
+    team_two_mmr = team_mmr(team_two)
+    mmr_list = ladder_ranking()[1]
+    for key, value in team_one.items():
+        mu_mmr = mmr_list[team_two[key]]
+        update_player_mmr(value, one_result, team_one_mmr, team_two_mmr, mu_mmr)
+    for key, value in team_two.items():
+        mu_mmr = mmr_list[team_one[key]]
+        update_player_mmr(value, two_result, team_two_mmr, team_one_mmr, mu_mmr)
+
+
+#client.test.ian.insert_one(op.post)
+#client.test.ian.delete_one(op.find_last_document(client.test, "ian")[0])
+#op.add_user("shane", client.mmr)
+#update_all(blue3, red3, 1, 0)
+#op.delete_documents_in_all(client.mmr)
+#op.add_collections(client.mmr)
+#mmr_history("vevey")
 ladder_ranking()

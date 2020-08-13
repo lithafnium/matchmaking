@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/Users/steveli/.pyenv/versions/3.6.3/bin/python"
+    "python.pythonPath": "C:\\Users\\19194\\PycharmProjects\\blabla\\venv\\Scripts\\python.exe",
+    "python.formatting.provider": "black"
 }
