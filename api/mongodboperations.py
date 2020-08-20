@@ -3,7 +3,7 @@ import pymongo as pymongo
 client = pymongo.MongoClient("mongodb+srv://bobjoe:abc@cluster0.j9y1e.mongodb.net/test?retryWrites=true&w=majority")
 db2 = client.test
 
-post = {"mmr": "800"}
+post = {"mmr": "1000"}
 # db.ian.insert_one(post)
 # delete_many = db.ian.delete_many({})
 names = ["ian", "liam", "will", "nicky", "steve", "vevey", "yuuki", "aaron", "erik", "cam"]

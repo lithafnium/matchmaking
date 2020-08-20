@@ -1,17 +1,39 @@
 import math
 import pymongo
 import mongodboperations as op
+from django.utils.crypto import get_random_string
+
 
 client = pymongo.MongoClient(
     "mongodb+srv://bobjoe:abc@cluster0.j9y1e.mongodb.net/test?retryWrites=true&w=majority"
 )
 
+
+# red
+blue7 = {"top": "aaron", "jng": "will", "mid": "duncan", "adc": "nicky", "sup": "ian"}
+red7 = {"top": "dana", "jng": "cam", "mid": "vevey", "adc": "liam", "sup": "steve"}
+
+# blue
+blue6 = {"top": "dana", "jng": "cam", "mid": "nicky", "adc": "steve", "sup": "vevey"}
+red6 = {"top": "ian", "jng": "liam", "mid": "duncan", "adc": "aaron", "sup": "yuuki"}
+
+# blue
+blue5 = {"top": "nicky", "jng": "aaron", "mid": "yuuki", "adc": "liam", "sup": "dana"}
+red5 = {"top": "cam", "jng": "vevey", "mid": "steve", "adc": "duncan", "sup": "ian"}
+
+# red
+blue4 = {"top": "cam", "jng": "steve", "mid": "aaron", "adc": "will", "sup": "ian"}
+red4 = {"top": "nicky", "jng": "liam", "mid": "yuuki", "adc": "vevey", "sup": "jocelyn"}
+
+# blue
 blue3 = {"top": "vevey", "jng": "aaron", "mid": "steve", "adc": "liam", "sup": "ian"}
 red3 = {"top": "shane", "jng": "will", "mid": "yuuki", "adc": "nicky", "sup": "cam"}
 
+# blue
 blue2 = {"top": "vevey", "jng": "yuuki", "mid": "erik", "adc": "liam", "sup": "cam"}
 red2 = {"top": "will", "jng": "nicky", "mid": "aaron", "adc": "steve", "sup": "ian"}
 
+# red
 blue1 = {"top": "aaron", "jng": "vevey", "mid": "cam", "adc": "liam", "sup": "steve"}
 red1 = {"top": "will", "jng": "erik", "mid": "ian", "adc": "nicky", "sup": "yuuki"}
 
@@ -47,7 +69,22 @@ def find_mmr(player):
 # stats tracker
 
 
-def update_player_mmr(player, result, own_team_mmr, opp_team_mmr, mu_mmr):
+def add_team(col, top, jng, mid, adc, sup, game_id):
+    db = client.teams
+    col = db[col]
+    post = {
+        "top": top,
+        "jng": jng,
+        "mid": mid,
+        "adc": adc,
+        "sup": sup,
+        "game_id": game_id,
+    }
+    col.insert_one(post)
+    return post
+
+
+def update_player_mmr(player, result, own_team_mmr, opp_team_mmr, mu_mmr, game_id):
     # change to mmr
     db = client.mmr
     # change to player
@@ -68,7 +105,7 @@ def update_player_mmr(player, result, own_team_mmr, opp_team_mmr, mu_mmr):
         + k_team * (result - expected_team)
         + k_mu * (result - expected_mu)
     )
-    post = {"mmr": str(updated_rating)}
+    post = {"mmr": str(updated_rating), "game_id": game_id}
     col.insert_one(post)
 
 
@@ -108,27 +145,88 @@ def delete_most_recent_game(player):
 
 def undo_last_game():
     db = client.mmr
+    for i in db.collection_names():
+        delete_most_recent_game(i)
 
 
+def update_all(
+    b_top,
+    b_jng,
+    b_mid,
+    b_adc,
+    b_sup,
+    r_top,
+    r_jng,
+    r_mid,
+    r_adc,
+    r_sup,
+    one_result,
+    two_result,
+):
+    game_id = get_random_string(20)
+    add_team("blue", b_top, b_jng, b_mid, b_adc, b_sup, game_id)
+    add_team("red", r_top, r_jng, r_mid, r_adc, r_sup, game_id)
+    blue_team = client.teams.blue.find({"game_id": game_id})
+    red_team = client.teams.red.find({"game_id": game_id})
+    team_one = {
+        "top": blue_team[0]["top"],
+        "jng": blue_team[0]["jng"],
+        "mid": blue_team[0]["mid"],
+        "adc": blue_team[0]["adc"],
+        "sup": blue_team[0]["sup"],
+    }
+    team_two = {
+        "top": red_team[0]["top"],
+        "jng": red_team[0]["jng"],
+        "mid": red_team[0]["mid"],
+        "adc": red_team[0]["adc"],
+        "sup": red_team[0]["sup"],
+    }
 
-
-def update_all(team_one, team_two, one_result, two_result):
     team_one_mmr = team_mmr(team_one)
     team_two_mmr = team_mmr(team_two)
     mmr_list = ladder_ranking()[1]
     for key, value in team_one.items():
         mu_mmr = mmr_list[team_two[key]]
-        update_player_mmr(value, one_result, team_one_mmr, team_two_mmr, mu_mmr)
+        update_player_mmr(
+            value, one_result, team_one_mmr, team_two_mmr, mu_mmr, game_id
+        )
     for key, value in team_two.items():
         mu_mmr = mmr_list[team_one[key]]
-        update_player_mmr(value, two_result, team_two_mmr, team_one_mmr, mu_mmr)
+        update_player_mmr(
+            value, two_result, team_two_mmr, team_one_mmr, mu_mmr, game_id
+        )
 
 
-#client.test.ian.insert_one(op.post)
-#client.test.ian.delete_one(op.find_last_document(client.test, "ian")[0])
-#op.add_user("shane", client.mmr)
-#update_all(blue3, red3, 1, 0)
-#op.delete_documents_in_all(client.mmr)
-#op.add_collections(client.mmr)
-#mmr_history("vevey")
-ladder_ranking()
+# client.test.ian.insert_one(op.post)
+# client.test.ian.delete_one(op.find_last_document(client.test, "ian")[0])
+# op.add_user("duncan", client.mmr)
+# update_all(blue3, red3, 1, 0)
+# op.delete_documents_in_all(client.mmr)
+# op.add_collections(client.mmr)
+# mmr_history("vevey")
+
+
+def drop_database(db):
+    for i in db.list_collection_names():
+        db[i].drop()
+
+
+update_all(
+    "aaron",
+    "will",
+    "vevey",
+    "liam",
+    "steve",
+    "ian",
+    "nicky",
+    "jocelyn",
+    "yuuki",
+    "cam",
+    0,
+    1,
+)
+
+
+#ladder_ranking()
+
