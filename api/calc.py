@@ -99,11 +99,16 @@ def update_player_mmr(player, result, own_team_mmr, opp_team_mmr, mu_mmr, game_i
     expected_team = expected_outcome(own_team_mmr, opp_team_mmr)
     expected_mu = expected_outcome(curr_rating, mu_mmr)
 
+    win_bonus = 0
+    if result == 1:
+        win_bonus = 4
+
     updated_rating = (
         curr_rating
         + k_pers * (result - expected_personal)
         + k_team * (result - expected_team)
         + k_mu * (result - expected_mu)
+        + win_bonus
     )
     post = {"mmr": str(updated_rating), "game_id": game_id}
     col.insert_one(post)
@@ -200,33 +205,153 @@ def update_all(
 
 # client.test.ian.insert_one(op.post)
 # client.test.ian.delete_one(op.find_last_document(client.test, "ian")[0])
-# op.add_user("duncan", client.mmr)
+
 # update_all(blue3, red3, 1, 0)
-# op.delete_documents_in_all(client.mmr)
-# op.add_collections(client.mmr)
+#op.delete_documents_in_all(client.mmr)
+#op.add_collections(client.mmr)
 # mmr_history("vevey")
 
+# op.add_user("sean", client.mmr)
+# op.add_user("jenny", client.mmr)
+# op.add_user("colin", client.mmr)
+# op.add_user("duncan", client.mmr)
+# op.add_user("shane", client.mmr)
+# op.add_user("dana", client.mmr)
+# op.add_user("jocelyn", client.mmr)
 
 def drop_database(db):
     for i in db.list_collection_names():
         db[i].drop()
 
+#drop_database(client.mmr)
+#1
+# update_all(
+#     "aaron",
+#     "vevey",
+#     "cam",
+#     "liam",
+#     "steve",
+#     "will",
+#     "erik",
+#     "ian",
+#     "nicky",
+#     "yuuki",
+#     0,
+#     1,
+# )
+#
+# #2
+# update_all(
+#     "vevey",
+#     "yuuki",
+#     "erik",
+#     "liam",
+#     "cam",
+#     "will",
+#     "nicky",
+#     "aaron",
+#     "steve",
+#     "ian",
+#     1,
+#     0,
+# )
+#
+# #3
+# update_all(
+#     "vevey",
+#     "aaron",
+#     "steve",
+#     "liam",
+#     "ian",
+#     "shane",
+#     "will",
+#     "yuuki",
+#     "nicky",
+#     "cam",
+#     1,
+#     0,
+# )
+#
+# #4
+# update_all(
+#     "cam",
+#     "steve",
+#     "aaron",
+#     "will",
+#     "ian",
+#     "nicky",
+#     "liam",
+#     "yuuki",
+#     "vevey",
+#     "jocelyn",
+#     0,
+#     1,
+# )
+#
+# #5
+# update_all(
+#     "nicky",
+#     "aaron",
+#     "yuuki",
+#     "liam",
+#     "dana",
+#     "cam",
+#     "vevey",
+#     "steve",
+#     "duncan",
+#     "ian",
+#     1,
+#     0,
+# )
+#
+# #6
+# update_all(
+#     "dana",
+#     "cam",
+#     "nicky",
+#     "steve",
+#     "vevey",
+#     "ian",
+#     "liam",
+#     "duncan",
+#     "aaron",
+#     "yuuki",
+#     1,
+#     0,
+# )
+#
+# #7
+# update_all(
+#     "aaron",
+#     "will",
+#     "duncan",
+#     "nicky",
+#     "ian",
+#     "dana",
+#     "cam",
+#     "vevey",
+#     "liam",
+#     "steve",
+#     0,
+#     1,
+# )
+#
+# #8
+# update_all(
+#     "dana",
+#     "liam",
+#     "aaron",
+#     "duncan",
+#     "sean",
+#     "shane",
+#     "colin",
+#     "jenny",
+#     "vevey",
+#     "jocelyn",
+#     0,
+#     1,
+# )
 
-update_all(
-    "aaron",
-    "will",
-    "vevey",
-    "liam",
-    "steve",
-    "ian",
-    "nicky",
-    "jocelyn",
-    "yuuki",
-    "cam",
-    0,
-    1,
-)
 
-
-#ladder_ranking()
+ladder_ranking()
 
