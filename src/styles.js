@@ -76,3 +76,9 @@ export const ListItem = styled.div`
       transition: background 0s;
     }
 `
+
+export const Row = styled.div`
+    width: 80%; 
+    display: flex; 
+    justify-content: space-between; 
+`
