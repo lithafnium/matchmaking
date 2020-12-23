@@ -13,7 +13,7 @@ client = pymongo.MongoClient(
     "mongodb+srv://bobjoe:abc@cluster0.j9y1e.mongodb.net/test?retryWrites=true&w=majority"
 )
 
-players = ["nicky", "ian", "cam", "liam", "aaron", "will", "yuuki", "erik", "steve", "vevey"]
+
 
 #think if given a big player pool, simulate riots queue matchmaking
 
@@ -22,22 +22,23 @@ def extract_mmr(players):
     mmr_list = []
     for i in players:
         entry = {}
-        doc = op.find_last_document(client.mmr, i)
+        doc = op.find_last_document(client["rainbow-mmr"], i)
         entry[i] = doc[0]["mmr"]
         mmr_list.append(entry)
     return mmr_list
 
 
+#MAKE THE ALGORITHM MORE EFFICIENT
 def greedy_algo(players):
     players_copy = players.copy()
     random.shuffle(players_copy)
     mmr_list = extract_mmr(players_copy)
     blue_team = []
     red_team = []
-    for i in range(5):
+    for i in range(4):
         blue_team.append(mmr_list[i])
-    for i in range(5):
-        red_team.append(mmr_list[5 + i])
+    for i in range(4):
+        red_team.append(mmr_list[4 + i])
     greedy_algo_swap(blue_team, red_team)
     print(blue_team)
     print(avg_mmr(blue_team))
@@ -343,7 +344,34 @@ def swapping_algo(players):
         print(avg_mmr(red_team))
 
 
+
+def acquire_teams2(player_list):
+    length = len(player_list)
+    count = 0
+    # hashcode
+    hash_set = set()
+    for i in range(0, length):
+        for j in range(i + 1, length):
+            for k in range(j + 1, length):
+                for l in range(k + 1, length):
+                        hash_res = sum(hash_custom([9 - i, 9 - j, 9 - k, 9 - l]))
+                        hash_set.add(hash_res)
+                        hash_check = sum(hash_custom([i, j, k, l]))
+
+                        if hash_check not in hash_set:
+                            yield [player_list[i], player_list[j], player_list[k], player_list[l]]
+                            count += 1
+
+
+def hash_custom2(array):
+    array.sort()
+    for n in range(4):
+        yield array[n] * (10 ** n)
+
+
+players = ["nicky", "ian", "colin", "liam", "aaron", "will", "steve", "vevey"]
+
 greedy_algo(players)
-brute_force_matchmaking(players)
-swapping_algo(players)
-print(start)
+# brute_force_matchmaking(players)
+# swapping_algo(players)
+# print(start)

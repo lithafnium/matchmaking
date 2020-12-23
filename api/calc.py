@@ -83,7 +83,7 @@ def add_team(col, top, jng, mid, adc, sup, game_id):
     col.insert_one(post)
     return post
 
-
+#MAKE THIS SCALABLE
 def update_player_mmr(player, result, own_team_mmr, opp_team_mmr, mu_mmr, game_id):
     # change to mmr
     db = client.mmr
